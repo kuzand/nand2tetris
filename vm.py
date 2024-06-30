@@ -1,8 +1,3 @@
-###############################################################################
-# The code intentionally avoids some Python-specific features like dicts,
-# classes etc. because the initial plan was to write it in C...
-###############################################################################
-
 import sys
 import os
 
