@@ -1,4 +1,5 @@
 # nand2tetris
 My implementation of the Assembler and VM in Python for the [nand2tetris](https://www.nand2tetris.org) course.
 
-Note that the code is not very Pythonic because the initial plan was to implement it in C after prototyping it in Python, but eventually I decided to keep it in Python as is...
+Note that the code is not very "pythonic" because the initial plan was to implement it in C after prototyping it in Python, but eventually I decided to keep it in Python as is.
+You can find a more "pythonic" version, though less readable, of just 120 lines of code [here](https://github.com/kuzand/nand2tetris/blob/short/vm.py). 
