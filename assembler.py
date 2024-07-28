@@ -54,82 +54,55 @@ JUMP_MAP = {
     "JMP": "111"
 }
 
-class SymbTable:
+class SymbolTable:
+    table = {
+        "R0":     0,
+        "R1":     1,
+        "R2":     2,
+        "R3":     3,
+        "R4":     4,
+        "R5":     5,
+        "R6":     6,
+        "R7":     7,
+        "R8":     8,
+        "R9":     9,
+        "R10":    10,
+        "R11":    11,
+        "R12":    12,
+        "R13":    13,
+        "R14":    14,
+        "R15":    15,
+        "SP":     0,
+        "LCL":    1,
+        "ARG":    2,
+        "THIS":   3,
+        "THAT":   4,
+        "SCREEN": 16384,
+        "KBR":    24576,
+    }
+    
     def __init__(self):
         self.variable_count = 0
-        self.table = {
-            "R0":     0,
-            "R1":     1,
-            "R2":     2,
-            "R3":     3,
-            "R4":     4,
-            "R5":     5,
-            "R6":     6,
-            "R7":     7,
-            "R8":     8,
-            "R9":     9,
-            "R10":    10,
-            "R11":    11,
-            "R12":    12,
-            "R13":    13,
-            "R14":    14,
-            "R15":    15,
-            "SP":     0,
-            "LCL":    1,
-            "ARG":    2,
-            "THIS":   3,
-            "THAT":   4,
-            "SCREEN": 16384,
-            "KBR":    24576,
-        }
+
 
 
 def itob(x, length):
-    """
-    Integer to binary string of given length.
-    (Using Python tricks: format(x, f"#0{length+2}b")[2:])
-    """
-    b = []
-    while x > 0:
-        if x % 2 == 0:
-            b.append('0')
-        else:
-            b.append('1')
-        x = x // 2
-    
-    for i in range(len(b)//2):
-        tmp = b[i]
-        b[i] = b[len(b) - 1 - i]
-        b[len(b) - 1 - i] = tmp
-    
-    # pad with zeroes to length
-    n = length - len(b)
-    return '0'*n + ''.join(b)
+	return format(x, f"0{length}b")[-length:]
 
 
 def parse_line(line):
-    """
-    If a line is a comment (starts with //) or is an empty line, then return empty string.
-    Otherwise remove inline comments and all white spaces from the line and return it.
-    """
-    parsed_line = ""
-    for c in line:
-        if c == "/":
-            break
-        if c != ' ' and c != '\n':
-            parsed_line += c
-    return parsed_line
+	return line.split('//')[0].replace(' ', '').replace('\t', '').replace('\n', '')
 
 
 def parse_a_instr(instr, symb_table):
-    xxx = instr[1:]
-    if ord(xxx[0]) >= 48 and ord(xxx[0]) <= 57:
-        return int(xxx)
-    else:
-        if xxx not in symb_table.table:
-            symb_table.table[xxx] = 16 + symb_table.variable_count
-            symb_table.variable_count += 1
-        return int(symb_table.table[xxx])
+	xxx = instr[1:]
+	if xxx.isdigit():
+		return int(xxx)
+	else:
+		if xxx not in symb_table.table:
+			symb_table.table[xxx] = 16 + symb_table.variable_count
+			symb_table.variable_count += 1
+		return symb_table.table[xxx]
 
     
 def parse_c_instr(instr):
@@ -148,13 +121,12 @@ def parse_c_instr(instr):
         if c == "=":
             dest = field
             field = ""
-            continue
-        if c == ";":
+        elif c == ";":
             has_jump = True
             comp = field
             field = ""
-            continue
-        field += c
+        else:
+        	field += c
     
     if has_jump:
         jump = field
@@ -166,9 +138,8 @@ def parse_c_instr(instr):
 
 def assemble(in_filename):
     f_in = open(in_filename, 'r')
-    f_out = open(in_filename[:-4] + "_my.hack", 'w') 
 
-    symb_table = SymbTable()
+    symb_table = SymbolTable()
     
     # First pass to determine the labels
     instr_count = 0
@@ -176,18 +147,13 @@ def assemble(in_filename):
         instr = parse_line(line)
         if instr:
             if instr[0] == '(':
-                label = ""
-                for c in instr[1:]:
-                    if c == ')':
-                        break
-                    else:
-                        label += c
+                label = instr[1:-1]
                 symb_table.table[label] = instr_count
             else:
                 instr_count += 1
-    f_in.seek(0)
-
+                
     # Second pass
+    f_in.seek(0)
     bin_code = ""
     for line in f_in:
         bin_instr = ""
@@ -195,18 +161,18 @@ def assemble(in_filename):
         if instr:
             if instr[0] == '@':
                 parsed_instr = parse_a_instr(instr, symb_table)
-                bin_instr = "0" + itob(parsed_instr, 15) 
+                bin_instr = "0" + itob(parsed_instr, 15)
             elif instr[0] == '(':
                 continue
             else:
-                parsed_instr = parse_c_instr(instr)
-                dest, comp, jump = parsed_instr
+                dest, comp, jump = parse_c_instr(instr)
                 bin_instr = "111" + COMP_MAP[comp] + DEST_MAP[dest] + JUMP_MAP[jump]
             bin_code += bin_instr + '\n'
     
+    f_out = open(in_filename.rsplit('.', 1)[0] + "_my.hack", 'w') 
     f_out.write(bin_code)
-    f_in.close
-    f_out.close
+    f_in.close()
+    f_out.close()
     print("Done!")        
 
 
@@ -214,5 +180,7 @@ def assemble(in_filename):
 if  __name__ == '__main__':
     if len(sys.argv) != 2 or not sys.argv[1].endswith(".asm"):
         raise Exception(f"Usage: python3 {sys.argv[0]} <in_filename.asm>")
+        sys.exit(1)
+        
     in_filename = sys.argv[1]
     assemble(in_filename)
