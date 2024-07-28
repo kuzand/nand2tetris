@@ -114,6 +114,7 @@ def main(path):
     f_out.close()
     print("Done!")
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         raise Exception(f"Usage: python3 {sys.argv[0]} <path>")

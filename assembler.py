@@ -84,15 +84,11 @@ class SymbolTable:
     def __init__(self):
         self.variable_count = 0
 
-
-
 def itob(x, length):
 	return format(x, f"0{length}b")[-length:]
 
-
 def parse_line(line):
 	return line.split('//')[0].replace(' ', '').replace('\t', '').replace('\n', '')
-
 
 def parse_a_instr(instr, symb_table):
 	xxx = instr[1:]
@@ -104,7 +100,6 @@ def parse_a_instr(instr, symb_table):
 			symb_table.variable_count += 1
 		return symb_table.table[xxx]
 
-    
 def parse_c_instr(instr):
     """
     Cases:
@@ -134,7 +129,6 @@ def parse_c_instr(instr):
         comp = field
 
     return [dest, comp, jump]
-
 
 def assemble(in_filename):
     f_in = open(in_filename, 'r')
@@ -171,10 +165,10 @@ def assemble(in_filename):
     
     f_out = open(in_filename.rsplit('.', 1)[0] + "_my.hack", 'w') 
     f_out.write(bin_code)
+    
     f_in.close()
     f_out.close()
     print("Done!")        
-
 
 
 if  __name__ == '__main__':
